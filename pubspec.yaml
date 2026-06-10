@@ -1,0 +1,57 @@
+name: pobitra_browser
+description: "A secure and features-rich Flutter web browser."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # Core browser rendering
+  flutter_inappwebview: ^6.1.5
+
+  # AI Assistant integration
+  google_generative_ai: ^0.4.7
+
+  # State management
+  flutter_bloc: ^9.1.1
+  bloc: ^9.2.1
+
+  # Local performant database
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+
+  # Directory paths
+  path_provider: ^2.1.5
+
+  # Secure storage
+  flutter_secure_storage: ^10.3.1
+
+  # Background downloading
+  flutter_downloader: ^1.12.0
+
+  # Sharing URLs/Files
+  share_plus: ^12.0.2
+
+  # Password vault biometric unlocking
+  local_auth: ^2.3.0
+
+  # SVG icon rendering
+  flutter_svg: ^2.0.12
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+  # Code generation
+  isar_generator: ^3.1.0+1
+  build_runner: ^2.4.0
+
+flutter:
+  uses-material-design: true
