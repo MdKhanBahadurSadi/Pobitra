@@ -6,6 +6,9 @@ import 'package:path_provider/path_provider.dart';
 import '../../features/history_bookmarks/data/models/bookmark_model.dart';
 import '../../features/history_bookmarks/data/models/history_model.dart';
 import '../../features/ai_assistant/data/models/ai_session_model.dart';
+import '../../features/browser_core/data/models/tab_persistence_model.dart';
+import '../../features/browser_core/data/models/user_script_model.dart';
+import '../../features/browser_core/data/models/search_engine_model.dart';
 
 class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();
@@ -25,6 +28,9 @@ class DatabaseService {
         BookmarkSchema,
         HistorySchema,
         AiSessionSchema,
+        TabPersistenceSchema,
+        UserScriptSchema,
+        SearchEngineSchema,
       ],
       directory: dir.path,
       inspector: true, // Enable Isar Inspector for debugging in dev

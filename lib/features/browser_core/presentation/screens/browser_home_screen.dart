@@ -5,6 +5,7 @@ import '../widgets/browser_webview_viewport.dart';
 import '../widgets/smart_address_bar.dart';
 import 'package:pobitra_browser/features/reader_mode/presentation/widgets/reader_view_overlay.dart';
 import 'package:pobitra_browser/features/ai_assistant/presentation/widgets/ai_assistant_panel.dart';
+import 'package:pobitra_browser/features/ai_assistant/presentation/widgets/voice_command_overlay.dart';
 import 'package:pobitra_browser/core/utils/dom_scraper.dart';
 
 class BrowserHomeScreen extends StatefulWidget {
@@ -19,6 +20,8 @@ class _BrowserHomeScreenState extends State<BrowserHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final GlobalKey<BrowserWebViewViewportState> viewportKey = GlobalKey<BrowserWebViewViewportState>();
+
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -34,7 +37,7 @@ class _BrowserHomeScreenState extends State<BrowserHomeScreen> {
                         return const Center(child: CircularProgressIndicator());
                       }
                       return BrowserWebViewViewport(
-                        key: ValueKey(activeTab.id),
+                        key: viewportKey,
                         tab: activeTab,
                       );
                     },
@@ -47,10 +50,27 @@ class _BrowserHomeScreenState extends State<BrowserHomeScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openAiAssistant,
-        backgroundColor: Colors.purple,
-        child: const Icon(Icons.auto_awesome, color: Colors.white),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton.small(
+            onPressed: () => viewportKey.currentState?.captureAndParseScreenshot(),
+            backgroundColor: Colors.blueAccent,
+            child: const Icon(Icons.screenshot_monitor, color: Colors.white),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton.small(
+            onPressed: _openVoiceAssistant,
+            backgroundColor: Colors.green,
+            child: const Icon(Icons.mic, color: Colors.white),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton(
+            onPressed: _openAiAssistant,
+            backgroundColor: Colors.purple,
+            child: const Icon(Icons.auto_awesome, color: Colors.white),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomAppBar(
         child: Row(
@@ -104,6 +124,15 @@ class _BrowserHomeScreenState extends State<BrowserHomeScreen> {
         );
       }
     }
+  }
+
+  void _openVoiceAssistant() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const VoiceCommandOverlay(),
+    );
   }
 
   Widget _buildTabOverview() {

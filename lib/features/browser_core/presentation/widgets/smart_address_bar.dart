@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:convert';
 import '../bloc/tab_cubit.dart';
+import '../bloc/search_engine_cubit.dart';
 import 'package:pobitra_browser/features/reader_mode/presentation/bloc/reader_mode_cubit.dart';
 import 'package:pobitra_browser/features/reader_mode/data/models/reader_content.dart';
 import 'package:pobitra_browser/core/utils/reader_scraper.dart';
@@ -65,7 +66,9 @@ class _SmartAddressBarState extends State<SmartAddressBar> {
     if (urlPattern.hasMatch(value)) {
       targetUrl = value.startsWith('http') ? value : 'https://$value';
     } else {
-      targetUrl = 'https://www.google.com/search?q=${Uri.encodeComponent(value)}';
+      final searchEngine = context.read<SearchEngineCubit>().state.defaultEngine;
+      final pattern = searchEngine?.searchUrlPattern ?? 'https://www.google.com/search?q=';
+      targetUrl = '$pattern${Uri.encodeComponent(value)}';
     }
 
     final activeTab = context.read<TabCubit>().state.activeTab;

@@ -3,11 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_cubit.dart';
 import 'features/browser_core/presentation/bloc/tab_cubit.dart';
+import 'features/browser_core/presentation/bloc/search_engine_cubit.dart';
 import 'features/browser_core/presentation/screens/browser_home_screen.dart';
 import 'features/ad_blocker/presentation/bloc/ad_blocker_cubit.dart';
 import 'features/ai_assistant/presentation/bloc/ai_assistant_cubit.dart';
 import 'features/ai_assistant/data/datasources/gemini_remote_source.dart';
 import 'features/reader_mode/presentation/bloc/reader_mode_cubit.dart';
+import 'features/password_manager/presentation/bloc/vault_cubit.dart';
+import 'features/history_bookmarks/data/datasources/cloud_sync_service.dart';
+import 'features/history_bookmarks/presentation/bloc/sync_cubit.dart';
+import 'core/database/database_service.dart';
 
 class PobitraApp extends StatelessWidget {
   const PobitraApp({super.key});
@@ -17,12 +22,20 @@ class PobitraApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<ThemeCubit>(create: (_) => ThemeCubit()),
-        BlocProvider<TabCubit>(create: (_) => TabCubit()..addNewTab('https://www.google.com')),
+        BlocProvider<TabCubit>(create: (_) => TabCubit()..loadSession()),
+        BlocProvider<SearchEngineCubit>(create: (_) => SearchEngineCubit()..loadEngines()),
         BlocProvider<AdBlockerCubit>(create: (_) => AdBlockerCubit()),
         BlocProvider<AiAssistantCubit>(
           create: (_) => AiAssistantCubit(GeminiRemoteSource()),
         ),
         BlocProvider<ReaderModeCubit>(create: (_) => ReaderModeCubit()),
+        BlocProvider<VaultCubit>(create: (_) => VaultCubit()),
+        BlocProvider<SyncCubit>(
+          create: (_) => SyncCubit(
+            CloudSyncService(),
+            DatabaseService(),
+          )..startSync(),
+        ),
       ],
       child: BlocBuilder<ThemeCubit, AppThemeMode>(
         builder: (context, activeMode) {

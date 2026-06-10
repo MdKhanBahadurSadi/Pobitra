@@ -1,5 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/models/tab_model.dart';
+import 'package:pobitra_browser/core/database/database_service.dart';
+import '../../data/models/tab_persistence_model.dart';
+import 'package:isar/isar.dart';
 
 class TabState {
   final List<TabModel> tabs;
@@ -27,7 +30,54 @@ class TabState {
 }
 
 class TabCubit extends Cubit<TabState> {
+  final DatabaseService _db = DatabaseService();
+
   TabCubit() : super(TabState());
+
+  Future<void> loadSession() async {
+    final persistedTabs = await _db.isar.tabPersistences.where().sortByPosition().findAll();
+    
+    if (persistedTabs.isEmpty) {
+      addNewTab('https://www.google.com');
+      return;
+    }
+
+    final tabs = persistedTabs.map((t) => TabModel(
+      id: t.tabId,
+      currentUrl: t.currentUrl,
+      title: t.title,
+      faviconUrl: t.faviconUrl,
+      isIncognito: t.isIncognito,
+    )).toList();
+
+    final activeTab = persistedTabs.firstWhere((t) => t.isActive, orElse: () => persistedTabs.first);
+
+    emit(TabState(
+      tabs: tabs,
+      activeTabId: activeTab.tabId,
+    ));
+  }
+
+  Future<void> _saveSession() async {
+    final tabs = state.tabs;
+    final activeId = state.activeTabId;
+
+    await _db.isar.writeTxn(() async {
+      await _db.isar.tabPersistences.clear();
+      for (int i = 0; i < tabs.length; i++) {
+        final tab = tabs[i];
+        final persistence = TabPersistence()
+          ..tabId = tab.id
+          ..currentUrl = tab.currentUrl
+          ..title = tab.title
+          ..faviconUrl = tab.faviconUrl
+          ..isIncognito = tab.isIncognito
+          ..position = i
+          ..isActive = tab.id == activeId;
+        await _db.isar.tabPersistences.put(persistence);
+      }
+    });
+  }
 
   void addNewTab(String url, {bool isIncognito = false}) {
     final newTab = TabModel(
@@ -42,6 +92,7 @@ class TabCubit extends Cubit<TabState> {
       tabs: updatedTabs,
       activeTabId: newTab.id,
     ));
+    _saveSession();
   }
 
   void closeTab(String id) {
@@ -59,11 +110,14 @@ class TabCubit extends Cubit<TabState> {
 
     if (updatedTabs.isEmpty) {
       addNewTab('https://www.google.com');
+    } else {
+      _saveSession();
     }
   }
 
   void switchToTab(String id) {
     emit(state.copyWith(activeTabId: id));
+    _saveSession();
   }
 
   void updateTabUrl(String id, String url, String title, {String? faviconUrl}) {
@@ -79,6 +133,7 @@ class TabCubit extends Cubit<TabState> {
     }).toList();
 
     emit(state.copyWith(tabs: updatedTabs));
+    _saveSession();
   }
 
   void updateProgress(String id, double progress) {
